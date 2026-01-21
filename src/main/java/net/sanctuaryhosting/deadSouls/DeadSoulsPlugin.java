@@ -112,6 +112,12 @@ public final class DeadSoulsPlugin extends JavaPlugin implements Listener, DeadS
     private final String languageSoulListPagePreviousTooltip = config.getString("language-soul-list-page-previous-tooltip");
     private final String languageSoulListPageTotal = config.getString("language-soul-list-page-total");
 
+    final String languageFreeSoulDoesNotExist = config.getString("language-free-soul-does-not-exist");
+    final String languageFreeSoulAlreadyReleased = config.getString("language-free-soul-already-released");
+    final String languageFreeSoulCannotFreeOwn = config.getString("language-free-soul-cannot-free-own");
+    final String languageFreeSoulDoesNotBelong = config.getString("language-free-soul-does-not-belong");
+    final String languageFreeSoulReleased = config.getString("language-free-soul-released");
+
     private final Set<EntityType> entitiesWithSouls = new HashSet<>();
     private final HashMap<Player, PlayerSoulInfo> watchedPlayers = new HashMap<>();
     private boolean refreshNearbySoulCache = false;

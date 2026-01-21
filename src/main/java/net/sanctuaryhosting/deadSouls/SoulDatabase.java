@@ -9,7 +9,6 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.util.NumberConversions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -48,7 +47,7 @@ final class SoulDatabase {
     private static final int SOUL_STORE_SCALE = 16;
 
     @Nullable
-    private final Plugin owner;
+    private final DeadSoulsPlugin owner;
     @NotNull
     private final SpatialDatabase<@NotNull Soul> souls = new SpatialDatabase<>();
     @NotNull
@@ -58,7 +57,7 @@ final class SoulDatabase {
 
     private boolean dirty = false;
 
-    public SoulDatabase(@Nullable Plugin owner, @NotNull Path databaseFile) {
+    public SoulDatabase(@Nullable DeadSoulsPlugin owner, @NotNull Path databaseFile) {
         this.owner = owner;
         this.databaseFile = databaseFile;
 
@@ -272,12 +271,16 @@ final class SoulDatabase {
         final Soul soul = getSoulById(soulId);
 
         if (soul == null) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<red>This soul does not exist. It may have been claimed already."));
+            if (owner != null) {
+                sender.sendMessage(MiniMessage.miniMessage().deserialize(owner.languageFreeSoulDoesNotExist));
+            }
             return;
         }
 
         if (soul.owner == null) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>This soul has already been released."));
+            if (owner != null) {
+                sender.sendMessage(MiniMessage.miniMessage().deserialize(owner.languageFreeSoulAlreadyReleased));
+            }
             return;
         }
 
@@ -285,20 +288,28 @@ final class SoulDatabase {
             final boolean ownSoul = soul.isOwnedBy(sender);
             if (ownSoul) {
                 if (!canFreeOwn) {
-                    sender.sendMessage(MiniMessage.miniMessage().deserialize("<red>You are unable to release your own soul."));
+                    if (owner != null) {
+                        sender.sendMessage(MiniMessage.miniMessage().deserialize(owner.languageFreeSoulCannotFreeOwn));
+                    }
                     return;
                 }
             } else {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize("<red>This soul does not belong to you."));
+                if (owner != null) {
+                    sender.sendMessage(MiniMessage.miniMessage().deserialize(owner.languageFreeSoulDoesNotBelong));
+                }
                 return;
             }
         }
 
         if (soul.freeSoul(System.currentTimeMillis(), soulFreeAfterMs)) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>This soul has been released."));
+            if (owner != null) {
+                sender.sendMessage(MiniMessage.miniMessage().deserialize(owner.languageFreeSoulReleased));
+            }
             dirty = true;
         } else {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>This soul has already been released."));
+            if (owner != null) {
+                sender.sendMessage(MiniMessage.miniMessage().deserialize(owner.languageFreeSoulAlreadyReleased));
+            }
         }
     }
 

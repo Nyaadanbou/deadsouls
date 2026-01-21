@@ -132,6 +132,13 @@ language-no-permission: "<red>You do not have permission to perform this action.
 language-actionbar-soul-does-not-exist: "<red>That soul does not exist."
 language-actionbar-soul-unable-to-locate: "<red>That soul was unable to be located."
 
+# Messages for freeing souls
+language-free-soul-does-not-exist: "<red>This soul does not exist. It may have been claimed already."
+language-free-soul-already-released: "<yellow>This soul has already been released."
+language-free-soul-cannot-free-own: "<red>You are unable to release your own soul."
+language-free-soul-does-not-belong: "<red>This soul does not belong to you."
+language-free-soul-released: "<yellow>This soul has been released."
+
 # The message displayed when the player dies to inform them that their soul has spawned, saving their items and experience.
 language-soul-spawned: "<newline><yellow>The world has suspended your soul, allowing your items and experience to linger in the world.<newline>"
 
