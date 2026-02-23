@@ -195,6 +195,24 @@ language-soul-list-teleport-button: "<dark_gray>» <underlined><gold>Teleport to
 language-soul-list-teleport-button-tooltip: "<dark_gray>» <gold>Left-Click <dark_purple>to teleport to your soul."
 language-actionbar-soul-teleport-success: "<yellow>You have been teleported to your soul."
 
+# The message displayed in the actionbar when the player uses /souls back but has no souls.
+language-actionbar-soul-back-no-souls: "<yellow>You do not have any souls to return to."
+
+# The message displayed in the actionbar when the player is teleported to their latest soul using /souls back.
+language-actionbar-soul-back-success: "<yellow>You have been teleported to your latest soul."
+
+# The message displayed to the sender when they teleport another player to their latest soul using /souls back <player>.
+# <player-name> is used as a placeholder for the name of the target player.
+language-actionbar-soul-back-other-success: "<yellow>Teleported <gold><player-name> <yellow>to their latest soul."
+
+# The message displayed when the target player is not found when using /souls back <player>.
+# <player-name> is used as a placeholder for the name of the target player.
+language-actionbar-soul-back-player-not-found: "<red>Player <gold><player-name> <red>was not found."
+
+# The message displayed when the target player has no souls when using /souls back <player>.
+# <player-name> is used as a placeholder for the name of the target player.
+language-actionbar-soul-back-player-no-souls: "<yellow><player-name> does not have any souls to return to."
+
 # The spacer used to center the page navigator.
 # There is no way to perfectly center the text, this is a band-aid attempt at doing so.
 language-soul-list-page-spacer: "                    "

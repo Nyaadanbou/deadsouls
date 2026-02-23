@@ -104,6 +104,11 @@ public final class DeadSoulsPlugin extends JavaPlugin implements Listener, DeadS
     private final String languageSoulListTeleportButton = config.getString("language-soul-list-teleport-button");
     private final String languageSoulListTeleportTooltip = config.getString("language-soul-list-teleport-button-tooltip");
     private final String languageSoulTeleportSuccess = config.getString("language-actionbar-soul-teleport-success");
+    private final String languageSoulBackNoSouls = config.getString("language-actionbar-soul-back-no-souls");
+    private final String languageSoulBackSuccess = config.getString("language-actionbar-soul-back-success");
+    private final String languageSoulBackOtherSuccess = config.getString("language-actionbar-soul-back-other-success");
+    private final String languageSoulBackPlayerNotFound = config.getString("language-actionbar-soul-back-player-not-found");
+    private final String languageSoulBackPlayerNoSouls = config.getString("language-actionbar-soul-back-player-no-souls");
     private final String languageSoulListPageSpacer = config.getString("language-soul-list-page-spacer");
     private final String languageSoulListPage = config.getString("language-soul-list-page");
     private final String languageSoulListPageNextButton = config.getString("language-soul-list-page-next-button");
@@ -561,6 +566,94 @@ public final class DeadSoulsPlugin extends JavaPlugin implements Listener, DeadS
             Component soulTeleportSuccessMessage = miniMessage.deserialize(languageSoulTeleportSuccess);
             sender.sendActionBar(soulTeleportSuccessMessage);
             return true;
+        }
+
+        if ("back".equalsIgnoreCase(word)) {
+            // /souls back [player] - Teleport self or a specified player to the latest soul
+            final String targetPlayerName = args.length >= 2 ? args[1] : null;
+
+            if (targetPlayerName != null) {
+                // /souls back <player> - Teleport another player to their latest soul
+                if (!sender.hasPermission("deadsouls.souls.back.all")) {
+                    Component noPermissionMessage = miniMessage.deserialize(languageNoPermission);
+                    sender.sendMessage(noPermissionMessage);
+                    return true;
+                }
+
+                final Player targetPlayer = getServer().getPlayer(targetPlayerName);
+                if (targetPlayer == null) {
+                    Component playerNotFoundMessage = miniMessage.deserialize(languageSoulBackPlayerNotFound,
+                            Placeholder.component("player-name", Component.text(targetPlayerName)));
+                    sender.sendMessage(playerNotFoundMessage);
+                    return true;
+                }
+
+                // Find the latest soul owned by the target player (across all worlds)
+                final List<SoulDatabase.@NotNull Soul> souls = soulDatabase.getSoulsByOwnerAndWorld(targetPlayer.getUniqueId(), null);
+                if (souls.isEmpty()) {
+                    Component noSoulsMessage = miniMessage.deserialize(languageSoulBackPlayerNoSouls,
+                            Placeholder.component("player-name", Component.text(targetPlayer.getName())));
+                    sender.sendMessage(noSoulsMessage);
+                    return true;
+                }
+
+                // Sort by timestamp descending to find the latest soul
+                souls.sort(Comparator.comparingLong(s -> -s.timestamp));
+                final SoulDatabase.Soul latestSoul = souls.get(0);
+
+                final World world = getServer().getWorld(latestSoul.locationWorld);
+                if (world == null) {
+                    Component unableToLocateMessage = miniMessage.deserialize(languageSoulUnableToLocate);
+                    sender.sendMessage(unableToLocateMessage);
+                    return true;
+                }
+
+                targetPlayer.teleport(new Location(world, latestSoul.locationX, latestSoul.locationY, latestSoul.locationZ), PlayerTeleportEvent.TeleportCause.COMMAND);
+                Component successMessage = miniMessage.deserialize(languageSoulBackOtherSuccess,
+                        Placeholder.component("player-name", Component.text(targetPlayer.getName())));
+                sender.sendMessage(successMessage);
+                Component targetMessage = miniMessage.deserialize(languageSoulBackSuccess);
+                targetPlayer.sendActionBar(targetMessage);
+                return true;
+            } else {
+                // /souls back - Teleport self to own latest soul
+                if (!(sender instanceof Player)) {
+                    String commandAvailableInGameMessage = "<red>This command is only available in-game. Use /souls back <player> to teleport a player.";
+                    sender.sendMessage(MiniMessage.miniMessage().deserialize(commandAvailableInGameMessage));
+                    return true;
+                }
+
+                if (!sender.hasPermission("deadsouls.souls.back") && !sender.hasPermission("deadsouls.souls.back.all")) {
+                    Component noPermissionMessage = miniMessage.deserialize(languageNoPermission);
+                    sender.sendMessage(noPermissionMessage);
+                    return true;
+                }
+
+                final Player player = (Player) sender;
+                // Find the latest soul owned by the player (across all worlds)
+                final List<SoulDatabase.@NotNull Soul> souls = soulDatabase.getSoulsByOwnerAndWorld(player.getUniqueId(), null);
+                if (souls.isEmpty()) {
+                    Component noSoulsMessage = miniMessage.deserialize(languageSoulBackNoSouls);
+                    sender.sendActionBar(noSoulsMessage);
+                    return true;
+                }
+
+                // Sort by timestamp descending to find the latest soul
+                souls.sort(Comparator.comparingLong(s -> -s.timestamp));
+                final SoulDatabase.Soul latestSoul = souls.get(0);
+
+                final World world = getServer().getWorld(latestSoul.locationWorld);
+                if (world == null) {
+                    Component unableToLocateMessage = miniMessage.deserialize(languageSoulUnableToLocate);
+                    sender.sendActionBar(unableToLocateMessage);
+                    return true;
+                }
+
+                player.teleport(new Location(world, latestSoul.locationX, latestSoul.locationY, latestSoul.locationZ), PlayerTeleportEvent.TeleportCause.COMMAND);
+                Component successMessage = miniMessage.deserialize(languageSoulBackSuccess);
+                player.sendActionBar(successMessage);
+                return true;
+            }
         }
 
         boolean listOwnSouls = sender.hasPermission("deadsouls.souls.list");

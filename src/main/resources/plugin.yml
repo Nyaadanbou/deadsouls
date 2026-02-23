@@ -12,6 +12,8 @@ commands:
     # /souls page <number> Shows the provided souls page in the soul list.
     # /souls release <id> Releases the provided soul.
     # /souls teleport <id> Teleports the player to the provided soul.
+    # /souls back Teleports the player to their latest soul (across all worlds).
+    # /souls back <player> Teleports the specified player to their latest soul (across all worlds).
 permissions:
   deadsouls.souls.spawn:
     description: Allows the player to spawn a soul upon death.
@@ -40,6 +42,9 @@ permissions:
   deadsouls.souls.teleport:
     description: Allows the player to teleport to their soul.
     default: false
+  deadsouls.souls.back:
+    description: Allows the player to teleport to their latest soul across all worlds using /souls back.
+    default: false
   deadsouls.souls.list.all:
     description: Lists all player souls when using the /souls command, even those that do not belong to them.
     default: op
@@ -48,4 +53,7 @@ permissions:
     default: op
   deadsouls.souls.teleport.all:
     description: Allows the player to teleport to any soul when using the `/souls` command, even those that do not belong to them.
+    default: op
+  deadsouls.souls.back.all:
+    description: Allows the player to teleport any player to their latest soul across all worlds using /souls back <player>.
     default: op
