@@ -3,6 +3,7 @@ package net.sanctuaryhosting.deadSouls;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
@@ -24,32 +25,17 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.NumberConversions;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-import static net.sanctuaryhosting.deadSouls.Util.distance2;
-import static net.sanctuaryhosting.deadSouls.Util.getTotalExperience;
-import static net.sanctuaryhosting.deadSouls.Util.isNear;
-import static net.sanctuaryhosting.deadSouls.Util.parseColor;
-import static net.sanctuaryhosting.deadSouls.Util.parseTimeMs;
-import static net.sanctuaryhosting.deadSouls.Util.set;
+import static net.sanctuaryhosting.deadSouls.Util.*;
 
 public final class DeadSoulsPlugin extends JavaPlugin implements Listener, DeadSoulsAPI {
 
@@ -104,11 +90,13 @@ public final class DeadSoulsPlugin extends JavaPlugin implements Listener, DeadS
     private final String languageSoulListTeleportButton = config.getString("language-soul-list-teleport-button");
     private final String languageSoulListTeleportTooltip = config.getString("language-soul-list-teleport-button-tooltip");
     private final String languageSoulTeleportSuccess = config.getString("language-actionbar-soul-teleport-success");
-    private final String languageSoulBackNoSouls = config.getString("language-actionbar-soul-back-no-souls");
-    private final String languageSoulBackSuccess = config.getString("language-actionbar-soul-back-success");
-    private final String languageSoulBackOtherSuccess = config.getString("language-actionbar-soul-back-other-success");
-    private final String languageSoulBackPlayerNotFound = config.getString("language-actionbar-soul-back-player-not-found");
-    private final String languageSoulBackPlayerNoSouls = config.getString("language-actionbar-soul-back-player-no-souls");
+    private final String languageBackSelfNoSouls = config.getString("language-back-self-no-souls");
+    private final String languageBackSelfSuccess = config.getString("language-back-self-success");
+    private final String languageBackSenderSuccess = config.getString("language-back-sender-success");
+    private final String languageBackSenderPlayerNotFound = config.getString("language-back-sender-player-not-found");
+    private final String languageBackSenderPlayerNoSouls = config.getString("language-back-sender-player-no-souls");
+    private final String languageBackTargetSuccess = config.getString("language-back-target-success");
+    private final String languageBackTargetNoSouls = config.getString("language-back-target-no-souls");
     private final String languageSoulListPageSpacer = config.getString("language-soul-list-page-spacer");
     private final String languageSoulListPage = config.getString("language-soul-list-page");
     private final String languageSoulListPageNextButton = config.getString("language-soul-list-page-next-button");
@@ -514,10 +502,10 @@ public final class DeadSoulsPlugin extends JavaPlugin implements Listener, DeadS
             return false;
         }
 
-        final String word = args.length >= 1 ? args[0]: "";
+        final String word = args.length >= 1 ? args[0] : "";
         int number;
         try {
-            number = args.length >= 2 ? Integer.parseInt(args[1]): -1;
+            number = args.length >= 2 ? Integer.parseInt(args[1]) : -1;
         } catch (NumberFormatException nfe) {
             number = -1;
         }
@@ -575,66 +563,105 @@ public final class DeadSoulsPlugin extends JavaPlugin implements Listener, DeadS
             if (targetPlayerName != null) {
                 // /souls back <player> - Teleport another player to their latest soul
                 if (!sender.hasPermission("deadsouls.souls.back.all")) {
-                    Component noPermissionMessage = miniMessage.deserialize(languageNoPermission);
-                    sender.sendMessage(noPermissionMessage);
+                    sender.sendMessage(miniMessage.deserialize(languageNoPermission));
                     return true;
                 }
 
                 final Player targetPlayer = getServer().getPlayer(targetPlayerName);
                 if (targetPlayer == null) {
-                    Component playerNotFoundMessage = miniMessage.deserialize(languageSoulBackPlayerNotFound,
-                            Placeholder.component("player-name", Component.text(targetPlayerName)));
-                    sender.sendMessage(playerNotFoundMessage);
+                    sender.sendMessage(miniMessage.deserialize(
+                            languageBackSenderPlayerNotFound,
+                            Placeholder.component("player-name", Component.text(targetPlayerName))
+                    ));
                     return true;
                 }
 
                 // Find the latest soul owned by the target player (across all worlds)
                 final List<SoulDatabase.@NotNull Soul> souls = soulDatabase.getSoulsByOwnerAndWorld(targetPlayer.getUniqueId(), null);
                 if (souls.isEmpty()) {
-                    Component noSoulsMessage = miniMessage.deserialize(languageSoulBackPlayerNoSouls,
-                            Placeholder.component("player-name", Component.text(targetPlayer.getName())));
-                    sender.sendMessage(noSoulsMessage);
+                    sender.sendMessage(miniMessage.deserialize(
+                            languageBackSenderPlayerNoSouls,
+                            Placeholder.component("player-name", targetPlayer.name())
+                    ));
+                    // Notify the target player with a subtitle (if they are not the sender)
+                    if (!targetPlayer.equals(sender)) {
+                        targetPlayer.showTitle(Title.title(
+                                miniMessage.deserialize(
+                                        languageBackTargetNoSouls,
+                                        Placeholder.component("player-name", sender.name())
+                                ),
+                                Component.empty(),
+                                0,
+                                100,
+                                20
+                        ));
+                    }
                     return true;
                 }
 
                 // Sort by timestamp descending to find the latest soul
                 souls.sort(Comparator.comparingLong(s -> -s.timestamp));
-                final SoulDatabase.Soul latestSoul = souls.get(0);
+                final SoulDatabase.Soul latestSoul = souls.getFirst();
 
                 final World world = getServer().getWorld(latestSoul.locationWorld);
                 if (world == null) {
-                    Component unableToLocateMessage = miniMessage.deserialize(languageSoulUnableToLocate);
-                    sender.sendMessage(unableToLocateMessage);
+                    sender.sendMessage(
+                            miniMessage.deserialize(languageSoulUnableToLocate)
+                    );
                     return true;
                 }
 
-                targetPlayer.teleport(new Location(world, latestSoul.locationX, latestSoul.locationY, latestSoul.locationZ), PlayerTeleportEvent.TeleportCause.COMMAND);
-                Component successMessage = miniMessage.deserialize(languageSoulBackOtherSuccess,
-                        Placeholder.component("player-name", Component.text(targetPlayer.getName())));
-                sender.sendMessage(successMessage);
-                Component targetMessage = miniMessage.deserialize(languageSoulBackSuccess);
-                targetPlayer.sendActionBar(targetMessage);
-                return true;
+                targetPlayer.teleportAsync(
+                        new Location(world, latestSoul.locationX, latestSoul.locationY, latestSoul.locationZ), PlayerTeleportEvent.TeleportCause.COMMAND
+                ).thenRun(() -> {
+                    sender.sendMessage(miniMessage.deserialize(
+                            languageBackSenderSuccess,
+                            Placeholder.component("player-name", targetPlayer.name())
+                    ));
+                    // Notify the target player with a subtitle
+                    if (targetPlayer.equals(sender)) {
+                        // Sender is the target player — show self-teleport message
+                        targetPlayer.showTitle(Title.title(
+                                miniMessage.deserialize(languageBackSelfSuccess),
+                                Component.empty()
+                        ));
+                    } else {
+                        // Someone else teleported the target player — show who did it
+                        targetPlayer.showTitle(Title.title(
+                                miniMessage.deserialize(
+                                        languageBackTargetSuccess,
+                                        Placeholder.component("player-name", sender.name())
+                                ),
+                                Component.empty(),
+                                0,
+                                100,
+                                10
+                        ));
+                    }
+                });
             } else {
                 // /souls back - Teleport self to own latest soul
-                if (!(sender instanceof Player)) {
-                    String commandAvailableInGameMessage = "<red>This command is only available in-game. Use /souls back <player> to teleport a player.";
-                    sender.sendMessage(MiniMessage.miniMessage().deserialize(commandAvailableInGameMessage));
+                if (!(sender instanceof Player player)) {
+                    sender.sendMessage(MiniMessage.miniMessage().deserialize(
+                            "<red>This command is only available in-game. Use /souls back <player> to teleport a player."
+                    ));
                     return true;
                 }
 
                 if (!sender.hasPermission("deadsouls.souls.back") && !sender.hasPermission("deadsouls.souls.back.all")) {
-                    Component noPermissionMessage = miniMessage.deserialize(languageNoPermission);
-                    sender.sendMessage(noPermissionMessage);
+                    sender.sendMessage(miniMessage.deserialize(
+                            languageNoPermission
+                    ));
                     return true;
                 }
 
-                final Player player = (Player) sender;
                 // Find the latest soul owned by the player (across all worlds)
                 final List<SoulDatabase.@NotNull Soul> souls = soulDatabase.getSoulsByOwnerAndWorld(player.getUniqueId(), null);
                 if (souls.isEmpty()) {
-                    Component noSoulsMessage = miniMessage.deserialize(languageSoulBackNoSouls);
-                    sender.sendActionBar(noSoulsMessage);
+                    player.showTitle(Title.title(
+                            Component.empty(),
+                            miniMessage.deserialize(languageBackSelfNoSouls))
+                    );
                     return true;
                 }
 
@@ -644,16 +671,20 @@ public final class DeadSoulsPlugin extends JavaPlugin implements Listener, DeadS
 
                 final World world = getServer().getWorld(latestSoul.locationWorld);
                 if (world == null) {
-                    Component unableToLocateMessage = miniMessage.deserialize(languageSoulUnableToLocate);
-                    sender.sendActionBar(unableToLocateMessage);
+                    player.showTitle(Title.title(
+                            Component.empty(),
+                            miniMessage.deserialize(languageSoulUnableToLocate))
+                    );
                     return true;
                 }
 
-                player.teleport(new Location(world, latestSoul.locationX, latestSoul.locationY, latestSoul.locationZ), PlayerTeleportEvent.TeleportCause.COMMAND);
-                Component successMessage = miniMessage.deserialize(languageSoulBackSuccess);
-                player.sendActionBar(successMessage);
-                return true;
+                player.teleportAsync(new Location(world, latestSoul.locationX, latestSoul.locationY, latestSoul.locationZ), PlayerTeleportEvent.TeleportCause.COMMAND)
+                        .thenRun(() -> player.showTitle(Title.title(
+                                Component.empty(),
+                                miniMessage.deserialize(languageBackSelfSuccess)
+                        )));
             }
+            return true;
         }
 
         boolean listOwnSouls = sender.hasPermission("deadsouls.souls.list");
@@ -673,7 +704,7 @@ public final class DeadSoulsPlugin extends JavaPlugin implements Listener, DeadS
             return false;
         }
 
-        final UUID senderUUID = (sender instanceof OfflinePlayer) ? ((OfflinePlayer) sender).getUniqueId(): null;
+        final UUID senderUUID = (sender instanceof OfflinePlayer) ? ((OfflinePlayer) sender).getUniqueId() : null;
 
         if (!(sender instanceof Player)) {
             // Console output
@@ -688,7 +719,7 @@ public final class DeadSoulsPlugin extends JavaPlugin implements Listener, DeadS
                     shownSouls++;
 
                     final World world = getServer().getWorld(soul.locationWorld);
-                    final String worldStr = world == null ? soul.locationWorld.toString(): world.getName();
+                    final String worldStr = world == null ? soul.locationWorld.toString() : world.getName();
 
                     final String ownerStr;
                     if (soul.owner == null) {
@@ -709,7 +740,7 @@ public final class DeadSoulsPlugin extends JavaPlugin implements Listener, DeadS
             sender.sendMessage(shownSouls + " souls");
         } else {
             // Normal player output
-            final List<SoulDatabase.@NotNull Soul> souls = soulDatabase.getSoulsByOwnerAndWorld(listAllSouls ? null: senderUUID, ((Player) sender).getWorld().getUID());
+            final List<SoulDatabase.@NotNull Soul> souls = soulDatabase.getSoulsByOwnerAndWorld(listAllSouls ? null : senderUUID, ((Player) sender).getWorld().getUID());
             final Location location = ((Player) sender).getLocation();
             souls.sort(Comparator.comparingLong(soulAndId -> -soulAndId.timestamp));
 
@@ -886,7 +917,7 @@ public final class DeadSoulsPlugin extends JavaPlugin implements Listener, DeadS
         if (event.getKeepLevel() || !player.hasPermission("deadsouls.souls.save.experience")
                 // Required because getKeepLevel is not set when world's KEEP_INVENTORY is set, but it has the same effect
                 // See https://hub.spigotmc.org/jira/browse/SPIGOT-2222
-                || Boolean.TRUE.equals(world.getGameRuleValue(GameRule.KEEP_INVENTORY))) {
+                || Boolean.TRUE.equals(world.getGameRuleValue(GameRules.KEEP_INVENTORY))) {
             // We don't modify XP for this death at all
             soulXp = 0;
         } else {
@@ -1275,7 +1306,7 @@ public final class DeadSoulsPlugin extends JavaPlugin implements Listener, DeadS
 
     @Override
     public @NotNull Soul createSoul(@Nullable UUID owner, @NotNull UUID world, double x, double y, double z, @Nullable ItemStack[] contents, int xp) {
-        ItemStack[] nnContents = contents == null ? noItemStack: contents;
+        ItemStack[] nnContents = contents == null ? noItemStack : contents;
         final SoulDatabase soulDatabase = this.soulDatabase;
         if (soulDatabase == null) {
             // Sad, but better than returning null which would probably cause crash. This situation can be tested through soulExists.

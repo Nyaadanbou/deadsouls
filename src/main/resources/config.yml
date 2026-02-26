@@ -6,13 +6,13 @@
 # Acceptable unit values include "s" for seconds, "m" for minutes, "h" for hours, "d" for days, or "never".
 # As an example, the soul will be automatically released after 20 minutes by setting this value to "20m".
 # Setting this value to "never" will never release the soul unless it is manually released by the player.
-soul-release-timer: 2h
+soul-release-timer: 12h
 
 # The amount of time before the soul fades away from the world, taking all items and experience with it.
 # Acceptable unit values include "s" for seconds, "m" for minutes, "h" for hours, "d" for days, or "never".
 # As an example, the soul will automatically fade away after one week by setting this value to "7d".
 # Setting this value to "never" will never allow the soul to fade away until it is collected by a player.
-soul-fade-timer: never
+soul-fade-timer: 1d
 
 # Whether smart soul placement should be enabled.
 # When this option is enabled, the soul will not spawn exactly where the player died, but the last location they were considered safe (unless it would be too far away).
@@ -26,7 +26,7 @@ smart-soul-placement: true
 # As an example, if this value is set to "10", and the player was level 8 when they died, they would receive 80 experience upon collecting the soul.
 # Percentage values are of the total experience.
 # As an example, if this value is set to "50%", and the player had 240 experience when they died, they would receive 120 experience upon collecting the soul.
-saved-experience: 7
+saved-experience: 0%
 
 # How the soul will behave when the player dies at the hands of another player.
 # A "normal" value will result in no change; the soul will spawn and behave normally.
@@ -42,7 +42,12 @@ pvp-behavior: normal
 #   "*" would spawn souls in all worlds.
 #   "0123-1234-2345-3456" would only spawn souls in the world with the matching UUID.
 #   "World*" would spawn souls in any world whose name begins with "World", such as "World", "World8-4", "World_nether", etc.
-enabled-worlds: [ "*" ]
+enabled-worlds:
+  - eden
+  - dune
+  - hollow
+  - nether
+  - end
 
 # The amount of time before each soul is automatically saved in the database.
 # Acceptable unit values include "s" for seconds, "m" for minutes, "h" for hours, "d" for days, or "never".
@@ -72,7 +77,7 @@ soul-sound-calling: block.beacon.ambient
 
 # The distance at which the calling sound is able to be heard.
 # Increasing this value will allow players to hear their soul from farther away.
-soul-sound-calling-distance: 16
+soul-sound-calling-distance: 96
 
 # The sound played when a player collects a soul with items.
 soul-sound-collected-item: item.trident.return
@@ -116,7 +121,7 @@ soul-page-depth: 4
 # The amount of days before a soul is considered "Ancient" in the `/souls` list.
 # As an example, the soul will be considered ancient after one month by setting this value to "30".
 # This is option is purely cosmetic, but could be used in conjunction with the soul-release-timer or soul-fade-timer values for more immersion.
-soul-age-ancient: 14
+soul-age-ancient: 12h
 
 
 # =======================
@@ -128,48 +133,48 @@ soul-age-ancient: 14
 # Placeholders can be removed if you wish to not display them (such as the Y-Coordinate in coordinate messages).
 # You can test messages before implementing them here: https://webui.advntr.dev/
 
-language-no-permission: "<red>You do not have permission to perform this action."
-language-actionbar-soul-does-not-exist: "<red>That soul does not exist."
-language-actionbar-soul-unable-to-locate: "<red>That soul was unable to be located."
+language-no-permission: "<red>汝无权执行此举."
+language-actionbar-soul-does-not-exist: "<red>该灵魂业已消散."
+language-actionbar-soul-unable-to-locate: "<red>无法感知该灵魂."
 
 # Messages for freeing souls
-language-free-soul-does-not-exist: "<red>This soul does not exist. It may have been claimed already."
-language-free-soul-already-released: "<yellow>This soul has already been released."
-language-free-soul-cannot-free-own: "<red>You are unable to release your own soul."
-language-free-soul-does-not-belong: "<red>This soul does not belong to you."
-language-free-soul-released: "<yellow>This soul has been released."
+language-free-soul-does-not-exist: "<red>该灵魂不存在. 恐已被他人拾取."
+language-free-soul-already-released: "<yellow>该灵魂已被释放."
+language-free-soul-cannot-free-own: "<red>汝无法释放自身之灵魂."
+language-free-soul-does-not-belong: "<red>该灵魂不属于汝."
+language-free-soul-released: "<yellow>该灵魂已被释放."
 
 # The message displayed when the player dies to inform them that their soul has spawned, saving their items and experience.
-language-soul-spawned: "<newline><yellow>The world has suspended your soul, allowing your items and experience to linger in the world.<newline>"
+language-soul-spawned: "<newline><yellow>世界已缚住汝之灵魂, 使汝生前之遗物得以保留于其中. 寻余烬摆渡者发动回魂术可回到汝之灵魂处, 拾回生前之遗物.<newline>"
 
 # The message displayed after the soul spawned message when the player dies to inform them of the location of their soul.
 # The player must have the `deadsouls.souls.list.coordinates` permission to see this information.
 # <soul-x-coordinate>, <soul-y-coordinate>, and <soul-z-coordinate> are used as a placeholder for the X coordinate, Y coordinate, and Z coordinate, respectively.
-language-soul-spawned-coordinates: "<newline><newline><gray>☠ <yellow>Your soul can be located at <gray>X: <soul-x-coordinate> <yellow>/ <gray>Y: <soul-y-coordinate> <yellow>/ <gray>Z: <soul-z-coordinate><yellow>. <gray>☠<newline> "
+language-soul-spawned-coordinates: "<newline><newline><gray>☠ <yellow>汝之灵魂位于 <gray>X: <soul-x-coordinate> <yellow>/ <gray>Y: <soul-y-coordinate> <yellow>/ <gray>Z: <soul-z-coordinate><yellow>. <gray>☠<newline> "
 
 # The message displayed in the actionbar when a soul is depleted.
-language-actionbar-soul-claimed: "<yellow>You have regained the items and experience from this soul."
+language-actionbar-soul-claimed: "<yellow>已恢复生前之遗物."
 
 # The message displayed in the actionbar when the player attempts to view the `/souls` list while having no souls.
-language-actionbar-soul-list-no-souls: "<yellow>You do not have any souls to claim."
+language-actionbar-soul-list-no-souls: "<yellow>汝于当前维度无灵魂可夺."
 
 # The style applied to the header at the top of the `/souls` list.
 # <player-name> is used as a placeholder for the name of the player.
-language-soul-list-header: "<reset><newline><yellow>  <strikethrough>                </strikethrough>  <gray>☠ <underlined><gold><player-name>'s Souls</underlined> <gray>☠<yellow>  <strikethrough>                </strikethrough><newline><reset>"
+language-soul-list-header: "<reset><newline><yellow>  <strikethrough>                </strikethrough>  <gray>☠ <underlined><gold><player-name>之灵魂</underlined> <gray>☠<yellow>  <strikethrough>                </strikethrough><newline><reset>"
 
 # The style of each numbered soul list in the `/souls` list.
 # <soul-number> is used as a placeholder for the number of the soul in the list.
-language-soul-list-number-style: "<yellow>Soul <gold>#<soul-number><yellow>: "
+language-soul-list-number-style: "<yellow>灵魂 <gold>#<soul-number><yellow>: "
 
 # The style applied to the age of the soul in the `/souls` list.
 # <soul-age> is used as a placeholder for the age of the soul.
 language-soul-list-age-time-style: "<dark_aqua><soul-age>."
 
-language-soul-list-age-new: "New"
-language-soul-list-age-minutes-old: "minutes old"
-language-soul-list-age-hours-old: "hours old"
-language-soul-list-age-days-old: "days old"
-language-soul-list-age-ancient: "Ancient"
+language-soul-list-age-new: "新生"
+language-soul-list-age-minutes-old: "分钟前"
+language-soul-list-age-hours-old: "小时前"
+language-soul-list-age-days-old: "天前"
+language-soul-list-age-ancient: "上古"
 
 # The style applied to the coordinates of the soul in the `/souls` list.
 # The player must have the `deadsouls.souls.list.coordinates` permission to see this information.
@@ -179,39 +184,44 @@ language-soul-list-coordinates-style: " <dark_aqua>(<gray>X: <soul-x-coordinate>
 # The style applied to the distance of the soul in the `/souls` list.
 # The player must have the `deadsouls.souls.list.distance` permission to see this information.
 # <soul-distance> is used as a placeholder for the distance away from the soul.
-language-soul-list-distance-style: " <dark_aqua>(<gray><soul-distance> blocks away.<dark_aqua>)"
+language-soul-list-distance-style: " <dark_aqua>(<gray>相去 <soul-distance> 步之遥<dark_aqua>)"
 
 # The style of the release button in the `/souls` list.
 # The player must have the `deadsouls.souls.list.release` permission to see this button.
 # The button will automatically be hidden if the soul is older than the 'soul-release-timer' value, since the soul would already have been released.
 # The tooltip will be displayed when hovering over the release button.
-language-soul-list-release-button: "<dark_gray>» <underlined><green>Release your soul.</underlined>"
-language-soul-list-release-button-tooltip: "<dark_gray>» <gold>Left-Click <dark_purple>to release your soul."
+language-soul-list-release-button: "<dark_gray>» <underlined><green>释放灵魂</underlined>"
+language-soul-list-release-button-tooltip: "<dark_gray>» <aqua>左键点击 <light_purple>以解放汝之灵魂. <red>所有遗物将可被其他人拾取!"
 
 # The style of the teleport button in the `/souls` list.
 # The player must have the `deadsouls.souls.list.teleport` permission to see this button.
 # The tooltip will be displayed when hovering over the release button.
-language-soul-list-teleport-button: "<dark_gray>» <underlined><gold>Teleport to your soul.</underlined>"
-language-soul-list-teleport-button-tooltip: "<dark_gray>» <gold>Left-Click <dark_purple>to teleport to your soul."
-language-actionbar-soul-teleport-success: "<yellow>You have been teleported to your soul."
+language-soul-list-teleport-button: "<dark_gray>» <underlined><gold>传送至灵魂</underlined>"
+language-soul-list-teleport-button-tooltip: "<dark_gray>» <aqua>左键点击 <light_purple>以传送至汝之灵魂处."
+language-actionbar-soul-teleport-success: "<yellow>汝已临于灵魂之地."
 
-# The message displayed in the actionbar when the player uses /souls back but has no souls.
-language-actionbar-soul-back-no-souls: "<yellow>You do not have any souls to return to."
+# ── /souls back ──
+# Messages related to the /souls back [player] command.
 
-# The message displayed in the actionbar when the player is teleported to their latest soul using /souls back.
-language-actionbar-soul-back-success: "<yellow>You have been teleported to your latest soul."
-
-# The message displayed to the sender when they teleport another player to their latest soul using /souls back <player>.
-# <player-name> is used as a placeholder for the name of the target player.
-language-actionbar-soul-back-other-success: "<yellow>Teleported <gold><player-name> <yellow>to their latest soul."
-
-# The message displayed when the target player is not found when using /souls back <player>.
-# <player-name> is used as a placeholder for the name of the target player.
-language-actionbar-soul-back-player-not-found: "<red>Player <gold><player-name> <red>was not found."
-
-# The message displayed when the target player has no souls when using /souls back <player>.
-# <player-name> is used as a placeholder for the name of the target player.
-language-actionbar-soul-back-player-no-souls: "<yellow><player-name> does not have any souls to return to."
+# The subtitle displayed when the player uses /souls back but has no souls.
+language-back-self-no-souls: "<gray>余烬已散, 无可归处."
+# The subtitle displayed when the player is teleported to their latest soul using /souls back.
+language-back-self-success: "<gray>循迹而返, 归于近魂."
+# The message sent to the command executor when they teleport another player using /souls back <player>.
+# <player-name> — the name of the target player.
+language-back-sender-success: "<yellow>已引导 <gold><player-name></gold> 归向其近魂."
+# The message sent to the command executor when the specified player is not found.
+# <player-name> — the name that was typed.
+language-back-sender-player-not-found: "<red>世间难寻 <gold><player-name></gold> 之踪迹."
+# The message sent to the command executor when the specified player has no souls.
+# <player-name> — the name of the target player.
+language-back-sender-player-no-souls: "<gray><player-name> 余烬已散, 无可归处."
+# The subtitle displayed to the target player when someone else teleports them to their latest soul.
+# <player-name> — the name of the command executor.
+language-back-target-success: "<gray>循迹而返, 归于近魂."
+# The subtitle displayed to the target player when someone else tries /souls back <player> but they have no souls.
+# <player-name> — the name of the command executor.
+language-back-target-no-souls: "<gray>余烬已散, 无可归处."
 
 # The spacer used to center the page navigator.
 # There is no way to perfectly center the text, this is a band-aid attempt at doing so.
@@ -220,15 +230,15 @@ language-soul-list-page-spacer: "                    "
 # The style of the `/souls` list page indicator.
 # <soul-page-number> and <soul-page-total> are used as a placeholder for the page number and maximum page, respectively.
 # Tooltips will be displayed when hovering over the appropriate button.
-language-soul-list-page: "<yellow>Page <gold><soul-page-number> <yellow>of <gold><soul-page-total>"
+language-soul-list-page: "<yellow>第 <gold><soul-page-number> <yellow>页, 共 <gold><soul-page-total> <yellow>页"
 language-soul-list-page-previous-button: "<dark_gray>«"
-language-soul-list-page-previous-tooltip: "<dark_gray>» <gold>Left-Click <dark_purple>to view the previous page."
+language-soul-list-page-previous-tooltip: "<dark_gray>» <aqua>左键点击 <light_purple>查阅前页."
 language-soul-list-page-next-button: "<dark_gray>»"
-language-soul-list-page-next-tooltip: "<dark_gray>» <gold>Left-Click <dark_purple>to view the next page."
+language-soul-list-page-next-tooltip: "<dark_gray>» <aqua>左键点击 <light_purple>查阅后页."
 
 # The style of the total souls display following the page indicator.
 # <soul-count> is used as a placeholder for the number of souls applicable to the player.
-language-soul-list-page-total: "<yellow>(<gold><soul-count> <yellow>Total Souls)"
+language-soul-list-page-total: "<yellow>(<gold><soul-count> <yellow>灵魂)"
 
 
 # ===========================
